@@ -124,6 +124,18 @@ void ACatchCharacter::Look(const FInputActionValue& Value)
 	}
 }
 
+void ACatchCharacter::Jump()
+{
+	GetCharacterMovement()->GravityScale = GravityScaleJumpHold;
+	Super::Jump();
+}
+
+void ACatchCharacter::StopJumping()
+{
+	GetCharacterMovement()->GravityScale = 1;
+	Super::StopJumping();
+}
+
 
 
 

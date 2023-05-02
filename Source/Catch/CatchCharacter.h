@@ -37,6 +37,8 @@ class ACatchCharacter : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	class UInputAction* LookAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Jump, meta = (AllowPrivateAccess = "true"))
+	float GravityScaleJumpHold = 0.5;
 public:
 	ACatchCharacter();
 	
@@ -48,6 +50,9 @@ protected:
 
 	/** Called for looking input */
 	void Look(const FInputActionValue& Value);
+
+	void Jump() override;
+	void StopJumping() override;
 			
 
 protected:
