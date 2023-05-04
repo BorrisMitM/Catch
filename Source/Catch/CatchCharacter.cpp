@@ -1,6 +1,9 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "CatchCharacter.h"
+
+#include "CatchCharacterMovementComponent.h"
+#include "ClearReplacementShaders.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/InputComponent.h"
@@ -14,7 +17,7 @@
 //////////////////////////////////////////////////////////////////////////
 // ACatchCharacter
 
-ACatchCharacter::ACatchCharacter()
+ACatchCharacter::ACatchCharacter(const class FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer.SetDefaultSubobjectClass<UCatchCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
 {
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
@@ -66,6 +69,12 @@ void ACatchCharacter::BeginPlay()
 	}
 }
 
+void ACatchCharacter::Landed(const FHitResult& Hit)
+{
+	LastTimeLanded = GetGameTimeSinceCreation();
+	Super::Landed(Hit);
+}
+
 //////////////////////////////////////////////////////////////////////////
 // Input
 
@@ -75,7 +84,7 @@ void ACatchCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInp
 	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent)) {
 		
 		//Jumping
-		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ACharacter::Jump);
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ACharacter::Jump);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
 
 		//Moving
@@ -126,6 +135,12 @@ void ACatchCharacter::Look(const FInputActionValue& Value)
 
 void ACatchCharacter::Jump()
 {
+	const float TimeSinceLastLand = GetGameTimeSinceCreation() - LastTimeLanded;
+	if(TimeSinceLastLand <= BunnyHopBufferTime)
+	{
+		GetCharacterMovement()->Velocity = GetActorForwardVector() * GetCharacterMovement()->Velocity.Length();
+		GetCharacterMovement()->AddForce((GetActorForwardVector()) * BunnyHopForwardForce );
+	}
 	GetCharacterMovement()->GravityScale = GravityScaleJumpHold;
 	Super::Jump();
 }

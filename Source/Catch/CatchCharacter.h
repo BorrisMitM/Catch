@@ -40,7 +40,7 @@ class ACatchCharacter : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Jump, meta = (AllowPrivateAccess = "true"))
 	float GravityScaleJumpHold = 0.5;
 public:
-	ACatchCharacter();
+	ACatchCharacter(const class FObjectInitializer& ObjectInitializer);
 	
 
 protected:
@@ -53,14 +53,21 @@ protected:
 
 	void Jump() override;
 	void StopJumping() override;
-			
 
 protected:
+	UPROPERTY()
+	float LastTimeLanded;
+	UPROPERTY(EditAnywhere)
+	float BunnyHopBufferTime = 1;
+	UPROPERTY(EditAnywhere)
+	float BunnyHopForwardForce = 1000000;
 	// APawn interface
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	
 	// To add mapping context
 	virtual void BeginPlay();
+
+	virtual void Landed(const FHitResult& Hit) override;
 
 public:
 	/** Returns CameraBoom subobject **/
