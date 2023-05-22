@@ -5,6 +5,7 @@
 
 #include "GameFramework/Character.h"
 
+
 void UCatchCharacterMovementComponent::UpdateFromCompressedFlags(uint8 Flags)
 {
 	if (!CharacterOwner)
@@ -30,4 +31,17 @@ void UCatchCharacterMovementComponent::UpdateFromCompressedFlags(uint8 Flags)
 			CharacterOwner->StopJumping();
 		}
 	}
+}
+
+void UCatchCharacterMovementComponent::EndDash()
+{
+	MovementMode = MOVE_Falling;
+}
+
+void UCatchCharacterMovementComponent::DoDash()
+{
+	if(!IsFalling()) return;
+	MovementMode = MOVE_Flying;
+	FTimerHandle DashTimerHandle;
+	GetWorld()->GetTimerManager().SetTimer(DashTimerHandle, this, &UCatchCharacterMovementComponent::EndDash, 1);
 }

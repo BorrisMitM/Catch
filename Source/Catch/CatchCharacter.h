@@ -41,7 +41,7 @@ class ACatchCharacter : public ACharacter
 	class UInputAction* LookAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Jump, meta = (AllowPrivateAccess = "true"))
-	float GravityScaleJumpHold = 0.5;
+	float MaxJumpHoldTime = 0.5;
 public:
 	ACatchCharacter(const class FObjectInitializer& ObjectInitializer);
 	
@@ -57,6 +57,8 @@ protected:
 	void Jump() override;
 	void StopJumping() override;
 
+	void Dash();
+	virtual void CheckJumpInput(float DeltaTime) override;
 protected:
 	UPROPERTY()
 	float LastTimeLanded;

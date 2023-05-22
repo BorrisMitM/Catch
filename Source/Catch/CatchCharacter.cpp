@@ -70,6 +70,8 @@ void ACatchCharacter::BeginPlay()
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
 	}
+	
+	JumpMaxHoldTime = MaxJumpHoldTime;
 }
 
 void ACatchCharacter::Landed(const FHitResult& Hit)
@@ -138,20 +140,56 @@ void ACatchCharacter::Look(const FInputActionValue& Value)
 
 void ACatchCharacter::Jump()
 {
-	const float TimeSinceLastLand = GetGameTimeSinceCreation() - LastTimeLanded;
-	if(TimeSinceLastLand <= BunnyHopBufferTime)
-	{
-		GetCharacterMovement()->Velocity = GetActorForwardVector() * GetCharacterMovement()->Velocity.Length();
-		GetCharacterMovement()->AddForce((GetActorForwardVector()) * BunnyHopForwardForce );
-	}
-	GetCharacterMovement()->GravityScale = GravityScaleJumpHold;
+	// const float TimeSinceLastLand = GetGameTimeSinceCreation() - LastTimeLanded;
+	// if(TimeSinceLastLand <= BunnyHopBufferTime)
+	// {
+	// 	GetCharacterMovement()->Velocity = GetActorForwardVector() * GetCharacterMovement()->Velocity.Length();
+	// 	GetCharacterMovement()->AddForce((GetActorForwardVector()) * BunnyHopForwardForce );
+	// }
+	// GetCharacterMovement()->GravityScale = GravityScaleJumpHold;
 	Super::Jump();
 }
 
 void ACatchCharacter::StopJumping()
 {
-	GetCharacterMovement()->GravityScale = 1;
+// 	GetCharacterMovement()->GravityScale = 1;
 	Super::StopJumping();
+}
+
+void ACatchCharacter::CheckJumpInput(float DeltaTime)
+{
+	JumpCurrentCountPreJump = JumpCurrentCount;
+	if (UCatchCharacterMovementComponent* CharacterMovementComponent = Cast<UCatchCharacterMovementComponent>(GetMovementComponent()))
+	{
+		if (bPressedJump)
+		{
+			// If this is the first jump and we're already falling,
+			// then increment the JumpCount to compensate.
+			const bool bFirstJump = JumpCurrentCount == 0;
+			if (bFirstJump && CharacterMovementComponent->IsFalling())
+			{
+				JumpCurrentCount++;
+			}
+
+			const bool bDidJump = CanJump() && CharacterMovementComponent->DoJump(bClientUpdating);
+			if (bDidJump)
+			{
+				// Transition from not (actively) jumping to jumping.
+				if (!bWasJumping)
+				{
+					JumpCurrentCount++;
+					JumpForceTimeRemaining = GetJumpMaxHoldTime();
+					OnJumped();
+				}
+			}
+			else
+			{
+				CharacterMovementComponent->DoDash();
+			}
+
+			bWasJumping = bDidJump;
+		}
+	}
 }
 
 

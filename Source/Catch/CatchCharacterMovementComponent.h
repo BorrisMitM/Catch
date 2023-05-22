@@ -16,4 +16,7 @@ class CATCH_API UCatchCharacterMovementComponent : public UCharacterMovementComp
 
 protected:
 	virtual void UpdateFromCompressedFlags(uint8 Flags) override;
+	void EndDash();
+public:
+	void DoDash();
 };
