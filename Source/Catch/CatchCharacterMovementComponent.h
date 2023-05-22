@@ -17,6 +17,11 @@ class CATCH_API UCatchCharacterMovementComponent : public UCharacterMovementComp
 protected:
 	virtual void UpdateFromCompressedFlags(uint8 Flags) override;
 	void EndDash();
+	virtual void PhysFlying(float deltaTime, int32 Iterations) override;
 public:
 	void DoDash();
+	UPROPERTY(EditAnywhere, Category="Dash")
+	float DashDuration = 0.5;
+	UPROPERTY(EditAnywhere, Category="Dash")
+	float DashVelocity = 1500;
 };
