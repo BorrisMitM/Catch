@@ -24,4 +24,10 @@ public:
 	float DashDuration = 0.5;
 	UPROPERTY(EditAnywhere, Category="Dash")
 	float DashVelocity = 1500;
+	UPROPERTY(EditAnywhere, Category="Dash", meta = (ClampMin = "0.0", ClampMax = "1.0"))
+	float DashVerticalSmoothing = 0.9;
+
+	//Value between -1 and 1, reflects the amount of vertical direction in the dash
+	UPROPERTY(VisibleAnywhere, Category="Dash")
+	float UpDash = 0;
 };

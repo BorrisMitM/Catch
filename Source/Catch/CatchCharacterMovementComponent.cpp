@@ -4,6 +4,7 @@
 #include "CatchCharacterMovementComponent.h"
 
 #include "GameFramework/Character.h"
+#include "Kismet/KismetMathLibrary.h"
 
 
 void UCatchCharacterMovementComponent::UpdateFromCompressedFlags(uint8 Flags)
@@ -64,9 +65,13 @@ void UCatchCharacterMovementComponent::PhysFlying(float deltaTime, int32 Iterati
 
 	FVector OldLocation = UpdatedComponent->GetComponentLocation();
 	FVector MoveDir = GetOwner()->GetActorForwardVector();
-	MoveDir.Z = 0;
+
+	const float VerticalInput = UKismetMathLibrary::InverseTransformDirection(GetOwner()->GetTransform(), GetLastInputVector()).X;
+	UpDash = FMath::Lerp(UpDash, -VerticalInput, DashVerticalSmoothing);
+	UE_LOG(LogTemp, Warning, TEXT("%f"), UpDash);
+	MoveDir.Z = UpDash;
 	Velocity = MoveDir * DashVelocity;
-	const FVector Adjusted = Velocity * deltaTime;//Velocity * deltaTime;
+	const FVector Adjusted = Velocity * deltaTime; //Velocity * deltaTime;
 	FHitResult Hit(1.f);
 	SafeMoveUpdatedComponent(Adjusted, UpdatedComponent->GetComponentQuat(), true, Hit);
 
@@ -95,16 +100,18 @@ void UCatchCharacterMovementComponent::PhysFlying(float deltaTime, int32 Iterati
 		}
 	}
 
-	if( !bJustTeleported && !HasAnimRootMotion() && !CurrentRootMotion.HasOverrideVelocity() )
+	if (!bJustTeleported && !HasAnimRootMotion() && !CurrentRootMotion.HasOverrideVelocity())
 	{
 		Velocity = (UpdatedComponent->GetComponentLocation() - OldLocation) / deltaTime;
 	}
 }
 
+
 void UCatchCharacterMovementComponent::DoDash()
 {
 	if(!IsFalling()) return;
 	MovementMode = MOVE_Flying;
+	UpDash = 0;
 	FTimerHandle DashTimerHandle;
 	GetWorld()->GetTimerManager().SetTimer(DashTimerHandle, this, &UCatchCharacterMovementComponent::EndDash, DashDuration);
 }
